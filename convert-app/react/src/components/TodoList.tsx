@@ -10,12 +10,14 @@ function TodoList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [task, setTask] = useState<string>('');
   const [deadline, setDeadline] = useState<string>('');
+  const [assignee, setAssignee] = useState<string>('');
 
   const addTask = () => {
     if (task && deadline) {
       setTasks([...tasks, { task, deadline }]);
       setTask('');
       setDeadline('');
+      setAssignee('');
     }
   };
 
@@ -38,6 +40,12 @@ function TodoList() {
           type="date"
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Assignee"
+          value={assignee}
+          onChange={(e) => setAssignee(e.target.value)}
         />
         <button onClick={addTask}>Add Task</button>
       </div>
