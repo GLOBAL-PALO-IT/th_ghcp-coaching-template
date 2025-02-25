@@ -1,0 +1,524 @@
+openapi: 3.0.1
+x-stoplight:
+  id: e7y25xdzxtin1
+info:
+  title: Files
+  version: '1.0'
+x-amazon-apigateway-request-validators:
+  body-only:
+    validateRequestBody: true
+    validateRequestParameters: false
+  except-body:
+    validateRequestBody: false
+    validateRequestParameters: true
+    validateRequestHeaders: true
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+    validateRequestHeaders: true
+security:
+  - TokenAuth: []
+servers:
+  - url: 'http://localhost:1323'
+    description: Local environment
+  - url: 'http://localhost:3000'
+    description: Local lambda environment
+  - url: 'https://api-dev.paloitklimate.com/file-api-v1'
+    description: AWS development environment
+  - url: 'https://api-uat.paloitklimate.com/file-api-v1'
+    description: AWS uat environment
+  - url: 'https://api.paloitklimate.com/file-api-v1'
+    description: AWS prod environment
+paths:
+  /files/health:
+    get:
+      summary: Health endpoint
+      tags: []
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        credentials:
+          'Fn::GetAtt':
+            - ApiGatewayExecutionRole
+            - Arn
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          'Fn::Sub': 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FilesFunction.Arn}/invocations'
+        passthroughBehavior: when_no_match
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+      operationId: get-health
+      x-stoplight:
+        id: w2th64ceu1cq4
+  '/org/{orgId}/scope/{scopeId}/template':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: orgId
+        in: path
+        required: true
+        description: The organization id
+      - schema:
+          type: string
+          enum:
+            - scope1_1
+            - scope1_2
+            - scope1_3
+            - scope1_4
+            - scope2_1
+            - scope2_2
+            - scope2_3
+            - scope3_1
+            - scope3_2
+            - scope3_3
+            - scope3_4
+            - scope3_5
+            - scope3_6
+            - scope3_7
+            - scope3_8
+            - scope3_9
+            - scope3_10
+            - scope3_11
+            - scope3_12
+            - scope3_13
+            - scope3_14
+            - scope3_15
+            - scope1_5
+            - scope1_6
+            - scope3_16
+            - scope3_17
+        name: scopeId
+        in: path
+        description: Scope id to download the template
+        required: true
+    get:
+      summary: Get presigned URL for template
+      tags: []
+      security:
+        - cognito-authorizer: []
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        credentials:
+          'Fn::GetAtt':
+            - ApiGatewayExecutionRole
+            - Arn
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          'Fn::Sub': 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FilesFunction.Arn}/invocations'
+        passthroughBehavior: when_no_match
+      operationId: get-presigned-url
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignedUrl'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+        '404':
+          description: Not Found
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+      description: |-
+        Returns a presigned URL to request for a specific template type or generate file upload presigned URL.
+
+        For upload
+        S3 bucket: impact-tracker-files-bucket-dev
+        Example file path: scope_X/scopeX_Y/2024-07-30/example.xlsx
+
+        For download
+        S3 bucket: impact-tracker-template-bucket-dev
+        Example file path: scope_X/scope_X_Y.xlsx
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: fileName
+          description: Upload File name
+        - schema:
+            type: string
+            enum:
+              - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+          in: query
+          name: fileType
+          description: Content-type
+        - schema:
+            type: string
+            enum:
+              - upload
+              - download
+          in: query
+          name: operation
+          description: Generate presigned url for upload or download file
+          required: true
+      x-stoplight:
+        id: 4dk1gkx7fpljn
+  '/org/{orgId}/template-records':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: orgId
+        in: path
+        required: true
+    post:
+      summary: Add new template record
+      operationId: post-org-orgId-template-records
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+      description: Create new template record
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileTemplateRequest'
+      x-amazon-apigateway-request-validator: all
+      x-amazon-apigateway-integration:
+        credentials:
+          'Fn::GetAtt':
+            - ApiGatewayExecutionRole
+            - Arn
+        type: aws_proxy
+        httpMethod: POST
+        timeoutInMillis: 180000
+        uri:
+          'Fn::Sub': 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FilesFunction.Arn}/invocations'
+        passthroughBehavior: when_no_match
+components:
+  securitySchemes:
+    cognito-authorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: cognito_user_pools
+      x-amazon-apigateway-authorizer:
+        type: cognito_user_pools
+        providerARNs:
+          - 'Fn::ImportValue':
+              'Fn::Sub': '${Environment}-impact-tracker-CognitoUserPoolArn'
+  schemas:
+    ErrorModel:
+      title: ErrorModel
+      x-stoplight:
+        id: 4ncnsajfi2beh
+      type: object
+      description: Error model
+      properties:
+        code:
+          type: string
+          x-stoplight:
+            id: z76dm4lppukkj
+        message:
+          type: string
+          x-stoplight:
+            id: m0vvnvm1p7i4a
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+    PresignedUrl:
+      title: PresignedUrl
+      x-stoplight:
+        id: zez26tlpz369k
+      type: object
+      properties:
+        presignedUrl:
+          type: string
+          x-stoplight:
+            id: 352ug99fqx71u
+      description: Presigned url responses
+    Health:
+      title: Health
+      x-stoplight:
+        id: rvxibjff9pnbw
+      type: object
+      properties:
+        healthy:
+          type: boolean
+          x-stoplight:
+            id: 8pa7a565ed9xz
+        message:
+          type: string
+          x-stoplight:
+            id: lvg6yiqwsstaj
+    ModelFile:
+      type: object
+      properties:
+        presignedUrl:
+          type: string
+          x-stoplight:
+            id: 6bxitxl4hwy6h
+      x-stoplight:
+        id: r8mk5sk1rfm2k
+    Record:
+      title: Activity
+      x-stoplight:
+        id: 8c6ckglfy1iie
+      type: object
+      description: 'Records of template that is created '
+      properties:
+        dataPeriodStart:
+          type: string
+          x-stoplight:
+            id: uidu6t7gittp0
+          format: date
+          example: '2024-06-24'
+          description: Start date of the template
+        dataPeriodEnd:
+          type: string
+          x-stoplight:
+            id: z0yu46g93kpff
+          example: '2024-07-24'
+          format: date
+          description: End date of the template
+        fileName:
+          type: string
+          x-stoplight:
+            id: 62z9hrbwvwkin
+          example: Scope1_Direct Fuel
+          description: 'Name of file that uploaded '
+        createdBy:
+          type: string
+          x-stoplight:
+            id: kah8po77ynikl
+          example: Warakron Kanthawong
+          description: UUID of person who upload the file
+        checkedBy:
+          type: string
+          x-stoplight:
+            id: 58wvea349az1q
+          example: Warakron Kanthawong
+          description: |
+            UUID of the person who made the decision about the file
+        lastAction:
+          type: string
+          x-stoplight:
+            id: 57rjfla15cjyl
+          example: '2024-07-24T00:00:00Z'
+          format: date-time
+          description: Latest timestamp regarding the event of this file
+        status:
+          $ref: '#/components/schemas/Status'
+        updatedBy:
+          type: string
+          x-stoplight:
+            id: da3cryay52d31
+          example: John Doe
+          description: UUID of the person who update the file
+        scope:
+          type: integer
+          x-stoplight:
+            id: mrpjwu4nelyh8
+          description: scope of emission factor
+        subScope:
+          type: integer
+          x-stoplight:
+            id: a7nznyj53wv35
+          description: sub scope of templates
+        totalEmissionFactor:
+          type: number
+          x-stoplight:
+            id: 05d8ac8cjz38t
+          description: Total emission factor
+        assignEmissionFactor:
+          type: number
+          x-stoplight:
+            id: qzxhrcxpqw0x9
+          description: Number of rows that apply emission factor
+        organizationUUID:
+          type: string
+          x-stoplight:
+            id: 3ox9v52za4jj0
+        integrationManagerUUID:
+          type: string
+          x-stoplight:
+            id: optxqh25884dq
+        dataSourceExplanation:
+          type: string
+          x-stoplight:
+            id: uj02h5464bqmu
+        dataSourceLocator:
+          type: string
+          x-stoplight:
+            id: f9im59q64y1hh
+        creationDate:
+          type: string
+          x-stoplight:
+            id: yy2tlj4ydmjc7
+          format: date-time
+        emissionMappingResultSourceLocator:
+          type: string
+          x-stoplight:
+            id: 0vc7efpl8vnq8
+        fileUploadedDate:
+          type: string
+          x-stoplight:
+            id: dxjm8spmoy6mm
+          format: date-time
+        templateName:
+          type: string
+          x-stoplight:
+            id: 32oilxiatfm8k
+      required:
+        - dataPeriodStart
+        - dataPeriodEnd
+        - fileName
+        - createdBy
+        - status
+        - scope
+        - creationDate
+    Scope:
+      title: Scope
+      x-stoplight:
+        id: jnh3jxrqmm0xp
+      type: string
+      description: GHG Scope
+      enum:
+        - Scope 1
+        - Scope 2
+        - Scope 3
+    Status:
+      title: Status
+      x-stoplight:
+        id: 8hcfwnzdscar8
+      type: string
+      description: Status based on the latest event of this file
+      enum:
+        - VALIDATED
+        - VALIDATED_ERROR
+        - EF_ASSIGNED
+        - CALCULATED
+        - CALCULATING
+        - REMOVED
+        - UPLOADED
+    FileTemplateRequest:
+      title: FileTemplateRequest
+      x-stoplight:
+        id: 7vwfik1t3yoff
+      type: object
+      properties:
+        startDatePeriod:
+          type: string
+          x-stoplight:
+            id: ml1ymbi0x38ek
+          format: date
+        endDatePeriod:
+          type: string
+          x-stoplight:
+            id: q8j7rn4kh3wlq
+          format: date
+        fileName:
+          type: string
+          x-stoplight:
+            id: b3yq9mahe58et
+        scope:
+          type: integer
+          x-stoplight:
+            id: eydbga1tsnjmk
+          enum:
+            - 1
+            - 2
+            - 3
+        subScope:
+          type: integer
+          x-stoplight:
+            id: mvir1n0lytpo8
+      required:
+        - startDatePeriod
+        - endDatePeriod
+        - fileName
+        - scope
+        - subScope
+    FileDuplication:
+      title: FileDuplication
+      x-stoplight:
+        id: z4yxagl4d0afg
+      type: object
+      properties:
+        isDuplicated:
+          type: boolean
+          x-stoplight:
+            id: rwnhv5skgax7a
+        integrationManagerUUID:
+          type: string
+          x-stoplight:
+            id: otzwf0boq32hl
+    UpdateFileTemplateRequest:
+      title: UpdateFileTemplateRequest
+      x-stoplight:
+        id: r73wg90zwp74r
+      type: object
+      properties:
+        integrationManagerUUID:
+          type: string
+          x-stoplight:
+            id: aat1od4nvq300
+      required:
+        - integrationManagerUUID
+    ErrorDetail:
+      title: ErrorDetail
+      x-stoplight:
+        id: 191kr7pg3fh1k
+      type: object
+      properties:
+        key:
+          type: string
+          x-stoplight:
+            id: 7a5mzyzd6r3og
+        value:
+          type: string
+          x-stoplight:
+            id: xwdsnez9gkjcn
+      required:
+        - key
+        - value
