@@ -1,0 +1,6 @@
+RewriteEngine On
+RewriteBase /hotel-booking-service/
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /hotel-booking-service/index.php [L]
