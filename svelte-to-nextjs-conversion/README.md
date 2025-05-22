@@ -51,3 +51,7 @@ This repository serves as a practical example of converting a SvelteKit applicat
 
 ## 🤝 Contributing
 Feel free to explore, learn, and contribute to this demonstration project! 🌟
+
+
+## Prompt
+ - @workspace Rewrite this Svelte page as a Next.js
