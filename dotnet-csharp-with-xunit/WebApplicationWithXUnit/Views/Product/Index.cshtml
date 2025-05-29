@@ -1,0 +1,78 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Product List</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 32px 40px;
+        }
+        h1 {
+            color: #2d3e50;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+        .product-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            padding: 20px 18px;
+            transition: box-shadow 0.2s;
+        }
+        .product-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+        }
+        .product-card h4 {
+            margin: 0 0 10px 0;
+            color: #1a202c;
+        }
+        .product-card p {
+            margin: 4px 0;
+            color: #4a5568;
+        }
+        .product-card .price {
+            color: #2b9348;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product List</h1>
+        <div class="product-list">
+            @foreach (var product in Model.Products)
+            {
+                <div class="product-card">
+                    <h4>@product.Name</h4>
+                    <p>@product.Description</p>
+                    <p class="price">Price: @product.Price.ToString("C")</p>
+                </div>
+            }
+        </div>
+    </div>
+</body>
+</html>
